@@ -37,6 +37,14 @@ L = Lr + Lf
 fig, ax = plt.subplots()
 plt.subplots_adjust(bottom=0.3)
 
+#for the keyboard control
+current_steering_angle = 0.0  # in radians
+current_velocity = 0.0        # in pixels/sec
+steering_rate = np.radians(1.5)  # radians per frame
+acceleration = 10             # pixels/sec^2 per frame
+max_velocity = 1000
+max_steering = np.radians(50)
+
 #create robot parts
 body = patches.Rectangle(xy=(-body_length/2, -body_width/2),width=body_length, height=body_width, edgecolor='black', facecolor='blue')
 left_drive_wheel = patches.Rectangle(xy=(-wheel_thickness/2, -wheel_radius), width=wheel_radius*2,height=wheel_thickness, edgecolor='black', facecolor='green')
@@ -78,8 +86,34 @@ def reset(event):
 
 #for animation
 def animate(frame):
-    steering_angle = np.radians(steering_slider.val)
-    v = v_slider.val
+    global current_steering_angle, current_velocity
+    # Update steering
+    if keyboard.is_pressed('left'):
+        current_steering_angle += steering_rate
+    elif keyboard.is_pressed('right'):
+        current_steering_angle -= steering_rate
+    else:
+        # Optional: auto-return to center (like real steering wheel)
+        current_steering_angle *= 0.9  # damping factor
+
+    # Clamp steering angle
+    current_steering_angle = np.clip(current_steering_angle, -max_steering, max_steering)
+
+    # Update velocity
+    if keyboard.is_pressed('up'):
+        current_velocity += acceleration
+    elif keyboard.is_pressed('down'):
+        current_velocity -= acceleration
+    else:
+        # Optional: gradual deceleration (friction)
+        current_velocity *= 0.95
+
+    # Clamp velocity
+    current_velocity = np.clip(current_velocity, -max_velocity, max_velocity)
+
+    # Use updated values
+    steering_angle = current_steering_angle
+    v = current_velocity
 
     #kinematic bicycle equation of motions
     beta = np.arctan((Lr / L) * np.tan(steering_angle))
@@ -136,6 +170,10 @@ def animate(frame):
     left_steering_wheel.set_transform(t_lsw)
     right_steering_wheel.set_transform(t_rsw)
     ideal_steering_wheel.set_transform(t_isw)
+
+    steering_slider.set_val(np.degrees(current_steering_angle))
+    v_slider.set_val(abs(current_velocity))  # just for display
+
 
 # start animation
 ani = FuncAnimation(fig, animate, interval=10)
