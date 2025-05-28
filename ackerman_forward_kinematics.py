@@ -39,13 +39,13 @@ fig, ax = plt.subplots()
 plt.subplots_adjust(bottom=0.3)
 
 #create robot parts
-body = patches.Rectangle(xy=(-body_width/2, -body_length/2),width=body_width, height=body_length, edgecolor='black', facecolor='blue',rotation_point='center')
-left_drive_wheel = patches.Rectangle(xy=(-body_width/2-wheel_thickness/2, -body_length/2-wheel_radius), width=wheel_thickness,height=wheel_radius*2, edgecolor='black', facecolor='green',rotation_point='center')
-right_drive_wheel = patches.Rectangle(xy=(+body_width/2-wheel_thickness/2, -body_length/2-wheel_radius), width=wheel_thickness,height=wheel_radius*2, edgecolor='black', facecolor='green',rotation_point='center')
-ideal_drive_wheel = patches.Rectangle(xy=(+body_width/64-wheel_thickness/2, -body_length/2-wheel_radius), width=wheel_thickness,height=wheel_radius*2, edgecolor='black', facecolor='purple',rotation_point='center')
-left_steering_wheel = patches.Rectangle(xy=(-body_width/2-wheel_thickness/2, +body_length/2-wheel_radius), width=wheel_thickness,height=wheel_radius*2, edgecolor='black', facecolor='yellow',rotation_point='center')
-right_steering_wheel = patches.Rectangle(xy=(+body_width/2-wheel_thickness/2, +body_length/2-wheel_radius), width=wheel_thickness,height=wheel_radius*2, edgecolor='black', facecolor='yellow',rotation_point='center')
-ideal_steering_wheel = patches.Rectangle(xy=(+body_width/64-wheel_thickness/2, +body_length/2-wheel_radius), width=wheel_thickness,height=wheel_radius*2, edgecolor='black', facecolor='orange',rotation_point='center')
+body = patches.Rectangle(xy=(-body_length/2, -body_width/2),width=body_length, height=body_width, edgecolor='black', facecolor='blue')
+left_drive_wheel = patches.Rectangle(xy=(-wheel_thickness/2, -wheel_radius), width=wheel_radius*2,height=wheel_thickness, edgecolor='black', facecolor='green')
+right_drive_wheel = patches.Rectangle(xy=(-wheel_thickness/2, -wheel_radius), width=wheel_radius*2,height=wheel_thickness, edgecolor='black', facecolor='green')
+ideal_drive_wheel = patches.Rectangle(xy=(-wheel_thickness/2, -wheel_radius), width=wheel_radius*2,height=wheel_thickness, edgecolor='black', facecolor='purple')
+left_steering_wheel = patches.Rectangle(xy=(-wheel_thickness/2, -wheel_radius), width=wheel_radius*2,height=wheel_thickness, edgecolor='black', facecolor='yellow')
+right_steering_wheel = patches.Rectangle(xy=(-wheel_thickness/2, wheel_radius), width=wheel_radius*2,height=wheel_thickness, edgecolor='black', facecolor='yellow')
+ideal_steering_wheel = patches.Rectangle(xy=(-wheel_thickness/2, -wheel_radius), width=wheel_radius*2,height=wheel_thickness, edgecolor='black', facecolor='orange')
 
 ax.add_patch(body)
 ax.add_patch(left_drive_wheel)
@@ -67,7 +67,7 @@ ax.autoscale(False)
 axSteering = plt.axes([0.25, 0.2, 0.65, 0.03])
 steering_slider = Slider(axSteering, 'steering angle', -50, 50, valinit=0)
 axv = plt.axes([0.25, 0.15, 0.65, 0.03])
-v_slider = Slider(axv, 'linear velocity', 0, 50, valinit=0)
+v_slider = Slider(axv, 'linear velocity', 0, 1000, valinit=0)
 
 #reset button
 axreset = axwr = plt.axes([0.25, 0.1, 0.65, 0.03])
@@ -95,13 +95,13 @@ def animate(frame):
     pose.x = np.clip(pose.x, -1600, 1600)
     pose.y = np.clip(pose.y, -1600, 1600)
 
-    #local-to-world wheel positions
-    left_drive_wheel_local = np.array([-body_width/2-wheel_thickness/2, -body_length/2-wheel_radius])
-    right_drive_wheel_local = np.array([+body_width/2-wheel_thickness/2, -body_length/2-wheel_radius])
-    ideal_drive_wheel_local = np.array([+body_width/64-wheel_thickness/2, -body_length/2-wheel_radius])
-    left_steering_wheel_local = np.array([-body_width/2-wheel_thickness/2, +body_length/2-wheel_radius])
-    right_steering_wheel_local = np.array([+body_width/2-wheel_thickness/2, +body_length/2-wheel_radius])
-    ideal_steering_wheel_local = np.array([+body_width/64-wheel_thickness/2, +body_length/2-wheel_radius])
+    #local-to-world wheel positions center bach kit tha bottom left corner ey te 
+    left_drive_wheel_local = np.array([-body_length/2,body_width/2])
+    right_drive_wheel_local = np.array([-body_length/2,-body_width/2])
+    ideal_drive_wheel_local = np.array([-body_length/2, 0])
+    left_steering_wheel_local = np.array([+body_length/2,body_width/2])
+    right_steering_wheel_local = np.array([+body_length/2,-body_width/2])
+    ideal_steering_wheel_local = np.array([body_length/2, 0])
 
     R = rotation_matrix_2d(np.degrees(pose.theta))
     robot_center = np.array([pose.x, pose.y])
@@ -112,14 +112,14 @@ def animate(frame):
     right_steering_wheel_world = R @ right_steering_wheel_local + robot_center
     ideal_steering_wheel_world = R @ ideal_steering_wheel_local + robot_center
 
-    #update patch positions
-    body.set_xy((pose.x - body_width / 2, pose.y - body_length / 2))
-    left_drive_wheel.set_xy((left_drive_wheel_world[0]-body_width/2-wheel_thickness/2, left_drive_wheel_world[1]-body_length/2-wheel_radius))
-    right_drive_wheel.set_xy((right_drive_wheel_world[0]+body_width/2-wheel_thickness/2, right_drive_wheel_world[1]-body_length/2-wheel_radius))
-    ideal_drive_wheel.set_xy((ideal_drive_wheel_world[0]+body_width/64-wheel_thickness/2, ideal_drive_wheel_world[1]-body_length/2-wheel_radius))
-    left_steering_wheel.set_xy((left_steering_wheel_world[0]-body_width/2-wheel_thickness/2, left_steering_wheel_world[1]+body_length/2-wheel_radius))
-    right_steering_wheel.set_xy((right_steering_wheel_world[0]+body_width/2-wheel_thickness/2, right_steering_wheel_world[1]+body_length/2-wheel_radius))
-    ideal_steering_wheel.set_xy((ideal_steering_wheel_world[0]+body_width/64-wheel_thickness/2, ideal_steering_wheel_world[1]+body_length/2-wheel_radius))
+    #update patch positions with the bottom left corner offset for patch bro yknow how it is gang
+    body.set_xy((pose.x - body_length / 2, pose.y - body_width / 2))
+    left_drive_wheel.set_xy((left_drive_wheel_world[0]-wheel_radius, left_drive_wheel_world[1]-wheel_thickness/2))
+    right_drive_wheel.set_xy((right_drive_wheel_world[0]-wheel_radius, right_drive_wheel_world[1]-wheel_thickness/2))
+    ideal_drive_wheel.set_xy((ideal_drive_wheel_world[0]-wheel_radius, ideal_drive_wheel_world[1]-wheel_thickness/2))
+    left_steering_wheel.set_xy((left_steering_wheel_world[0]-wheel_radius, left_steering_wheel_world[1]-wheel_thickness/2))
+    right_steering_wheel.set_xy((right_steering_wheel_world[0]-wheel_radius, right_steering_wheel_world[1]-wheel_thickness/2))
+    ideal_steering_wheel.set_xy((ideal_steering_wheel_world[0]-wheel_radius, ideal_steering_wheel_world[1]-wheel_thickness/2))
 
     #update patch orientation
     t_b = mpl.transforms.Affine2D().rotate_around(pose.x, pose.y, pose.theta) + ax.transData
@@ -141,6 +141,4 @@ def animate(frame):
 # start animation
 ani = FuncAnimation(fig, animate, interval=10)
 button.on_clicked(reset)
-plt.show()
-
 plt.show()
