@@ -34,7 +34,6 @@ COM = body_length/2
 Lr = body_length/2 #rear axle to COM
 Lf = body_length/2 #front axle to COM
 L = Lr + Lf
-beta = 0
 fig, ax = plt.subplots()
 plt.subplots_adjust(bottom=0.3)
 
@@ -126,9 +125,9 @@ def animate(frame):
     t_ldw = mpl.transforms.Affine2D().rotate_around(left_drive_wheel_world[0], left_drive_wheel_world[1], pose.theta) + ax.transData
     t_rdw = mpl.transforms.Affine2D().rotate_around(right_drive_wheel_world[0], right_drive_wheel_world[1], pose.theta) + ax.transData
     t_idw = mpl.transforms.Affine2D().rotate_around(ideal_drive_wheel_world[0], ideal_drive_wheel_world[1], pose.theta) + ax.transData
-    t_lsw = mpl.transforms.Affine2D().rotate_around(left_steering_wheel_world[0], left_steering_wheel_world[1], pose.theta) + ax.transData
-    t_rsw = mpl.transforms.Affine2D().rotate_around(right_steering_wheel_world[0], right_steering_wheel_world[1], pose.theta) + ax.transData
-    t_isw = mpl.transforms.Affine2D().rotate_around(ideal_steering_wheel_world[0], ideal_steering_wheel_world[1], pose.theta) + ax.transData
+    t_lsw = mpl.transforms.Affine2D().rotate_around(left_steering_wheel_world[0], left_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
+    t_rsw = mpl.transforms.Affine2D().rotate_around(right_steering_wheel_world[0], right_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
+    t_isw = mpl.transforms.Affine2D().rotate_around(ideal_steering_wheel_world[0], ideal_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
     	
     body.set_transform(t_b)
     left_drive_wheel.set_transform(t_ldw)
