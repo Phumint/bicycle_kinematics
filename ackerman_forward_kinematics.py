@@ -136,6 +136,15 @@ def animate(frame):
     right_steering_wheel_local = np.array([+body_length/2,-body_width/2])
     ideal_steering_wheel_local = np.array([body_length/2, 0])
 
+    if steering_angle != 0:
+        turning_radius = L / np.tan(steering_angle)
+        R_inner = turning_radius - body_width / 2
+        R_outer = turning_radius + body_width / 2
+        inner_steering_angle = np.arctan(L / R_inner)
+        outer_steering_angle = np.arctan(L / R_outer)
+    else:
+        inner_steering_angle = outer_steering_angle = 0.0
+
     R = rotation_matrix_2d(np.degrees(pose.theta))
     robot_center = np.array([pose.x, pose.y])
     left_drive_wheel_world = R @ left_drive_wheel_local + robot_center
@@ -159,8 +168,15 @@ def animate(frame):
     t_ldw = mpl.transforms.Affine2D().rotate_around(left_drive_wheel_world[0], left_drive_wheel_world[1], pose.theta) + ax.transData
     t_rdw = mpl.transforms.Affine2D().rotate_around(right_drive_wheel_world[0], right_drive_wheel_world[1], pose.theta) + ax.transData
     t_idw = mpl.transforms.Affine2D().rotate_around(ideal_drive_wheel_world[0], ideal_drive_wheel_world[1], pose.theta) + ax.transData
-    t_lsw = mpl.transforms.Affine2D().rotate_around(left_steering_wheel_world[0], left_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
-    t_rsw = mpl.transforms.Affine2D().rotate_around(right_steering_wheel_world[0], right_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
+    if keyboard.is_pressed('left'):
+        t_lsw = mpl.transforms.Affine2D().rotate_around(left_steering_wheel_world[0], left_steering_wheel_world[1], pose.theta + inner_steering_angle) + ax.transData
+        t_rsw = mpl.transforms.Affine2D().rotate_around(right_steering_wheel_world[0], right_steering_wheel_world[1], pose.theta + outer_steering_angle) + ax.transData
+    elif keyboard.is_pressed('right'):
+        t_lsw = mpl.transforms.Affine2D().rotate_around(left_steering_wheel_world[0], left_steering_wheel_world[1], pose.theta + outer_steering_angle) + ax.transData
+        t_rsw = mpl.transforms.Affine2D().rotate_around(right_steering_wheel_world[0], right_steering_wheel_world[1], pose.theta + inner_steering_angle) + ax.transData
+    else:
+        t_lsw = mpl.transforms.Affine2D().rotate_around(left_steering_wheel_world[0], left_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
+        t_rsw = mpl.transforms.Affine2D().rotate_around(right_steering_wheel_world[0], right_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
     t_isw = mpl.transforms.Affine2D().rotate_around(ideal_steering_wheel_world[0], ideal_steering_wheel_world[1], pose.theta + steering_angle) + ax.transData
     	
     body.set_transform(t_b)
