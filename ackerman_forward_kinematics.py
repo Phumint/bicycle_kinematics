@@ -95,7 +95,7 @@ def animate(frame):
     else:
         # Optional: auto-return to center (like real steering wheel)
         current_steering_angle *= 0.9  # damping factor
-
+    
     # Clamp steering angle
     current_steering_angle = np.clip(current_steering_angle, -max_steering, max_steering)
 
